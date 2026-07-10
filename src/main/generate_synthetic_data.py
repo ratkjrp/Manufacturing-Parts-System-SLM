@@ -1,15 +1,17 @@
 import random
 import uuid
+import os
 from datetime import datetime, timedelta
 import numpy as np
 import pandas as pd
+from util import paths
 
 # -----------------------------
 # Config
 # -----------------------------
 SEED = 42
-N_PARTS = 350
-N_REPAIR_ORDERS = 10000
+N_PARTS = 300
+N_REPAIR_ORDERS = 1000
 START_DATE = datetime(2023, 1, 1)
 END_DATE = datetime(2026, 6, 30)
 
@@ -557,15 +559,15 @@ def main():
     split_map["split"] = split_map["created_at"].apply(split_tag)
 
     # write outputs
-    parts_df.to_csv("parts.csv", index=False)
-    repair_orders_df.to_csv("repair_orders.csv", index=False)
-    ro_parts_df.to_csv("ro_parts_used.csv", index=False)
+    parts_df.to_csv(os.path.join(paths.RAW_DATA, "parts.csv"), index=False)
+    repair_orders_df.to_csv(os.path.join(paths.RAW_DATA, "repair_orders.csv"), index=False)
+    ro_parts_df.to_csv(os.path.join(paths.RAW_DATA, "ro_parts_used.csv"), index=False)
 
     single_out = single_label_df.merge(split_map[["ro_id", "split"]], on="ro_id", how="left")
     multi_out = multi_label_df.merge(split_map[["ro_id", "split"]], on="ro_id", how="left")
 
-    single_out.to_csv("training_single_label.csv", index=False)
-    multi_out.to_csv("training_multi_label.csv", index=False)
+    single_out.to_csv(os.path.join(paths.RAW_DATA, "training_single_label.csv"), index=False)
+    multi_out.to_csv(os.path.join(paths.RAW_DATA, "training_multi_label.csv"), index=False)
 
     # basic stats
     print("Generated files:")
