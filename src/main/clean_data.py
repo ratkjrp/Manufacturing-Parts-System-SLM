@@ -18,7 +18,7 @@ import os
 import re
 import unicodedata
 from typing import List, Optional
-
+from util import paths
 import numpy as np
 import pandas as pd
 
@@ -292,27 +292,10 @@ def rebuild_training_from_ro(
 # Main
 # -----------------------------
 def main():
-    default_input_dir, default_output_dir = resolve_default_dirs()
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--input_dir",
-        default=".",
-        help="Directory with raw CSV files (default: current directory)"
-    )
-    parser.add_argument(
-        "--output_dir",
-        default="./cleaned",
-        help="Directory to write cleaned CSVs (default: ./cleaned)"
-    )
-    args = parser.parse_args()
-
-    os.makedirs(args.output_dir, exist_ok=True)
-
-    parts_path = os.path.join(args.input_dir, "parts.csv")
-    ro_path = os.path.join(args.input_dir, "repair_orders.csv")
-    rpu_path = os.path.join(args.input_dir, "ro_parts_used.csv")
-    train_path = os.path.join(args.input_dir, "training_multi_label.csv")
+    parts_path = os.path.join(paths.RAW_DATA, "parts.csv")
+    ro_path = os.path.join(paths.RAW_DATA, "repair_orders.csv")
+    rpu_path = os.path.join(paths.RAW_DATA, "ro_parts_used.csv")
+    train_path = os.path.join(paths.RAW_DATA, "training_multi_label.csv")
 
     required = [parts_path, ro_path, rpu_path]
     missing_required = [p for p in required if not os.path.exists(p)]
@@ -353,21 +336,21 @@ def main():
         cleaned_training_existing = train_rebuilt.copy()
 
     # Write cleaned base files
-    parts_clean.to_csv(os.path.join(args.output_dir, "cleaned_parts.csv"), index=False)
-    ro_clean.to_csv(os.path.join(args.output_dir, "cleaned_repair_orders.csv"), index=False)
-    rpu_clean.to_csv(os.path.join(args.output_dir, "cleaned_ro_parts_used.csv"), index=False)
-    cleaned_training_existing.to_csv(os.path.join(args.output_dir, "cleaned_training_multi_label.csv"), index=False)
-    train_rebuilt.to_csv(os.path.join(args.output_dir, "cleaned_training_multi_label_rebuilt.csv"), index=False)
+    parts_clean.to_csv(os.path.join(paths.PROC_DATA, "cleaned_parts.csv"), index=False)
+    ro_clean.to_csv(os.path.join(paths.PROC_DATA, "cleaned_repair_orders.csv"), index=False)
+    rpu_clean.to_csv(os.path.join(paths.PROC_DATA, "cleaned_ro_parts_used.csv"), index=False)
+    cleaned_training_existing.to_csv(os.path.join(paths.PROC_DATA, "cleaned_training_multi_label.csv"), index=False)
+    train_rebuilt.to_csv(os.path.join(paths.PROC_DATA, "cleaned_training_multi_label_rebuilt.csv"), index=False)
 
     # Export train/val/test from rebuilt
-    train_rebuilt[train_rebuilt["split"] == "train"].to_csv(os.path.join(args.output_dir, "train.csv"), index=False)
-    train_rebuilt[train_rebuilt["split"] == "val"].to_csv(os.path.join(args.output_dir, "val.csv"), index=False)
-    train_rebuilt[train_rebuilt["split"] == "test"].to_csv(os.path.join(args.output_dir, "test.csv"), index=False)
+    train_rebuilt[train_rebuilt["split"] == "train"].to_csv(os.path.join(paths.PROC_DATA, "train.csv"), index=False)
+    train_rebuilt[train_rebuilt["split"] == "val"].to_csv(os.path.join(paths.PROC_DATA, "val.csv"), index=False)
+    train_rebuilt[train_rebuilt["split"] == "test"].to_csv(os.path.join(paths.PROC_DATA, "test.csv"), index=False)
 
     # Quick QA summary
     print("=== Cleaning complete ===")
-    print(f"Input dir:  {args.input_dir}")
-    print(f"Output dir: {args.output_dir}")
+    print(f"Input dir:  {paths.RAW_DATA}")
+    print(f"Output dir: {paths.PROC_DATA}")
     print(f"parts: {len(parts)} -> {len(parts_clean)}")
     print(f"repair_orders: {len(ro)} -> {len(ro_clean)}")
     print(f"ro_parts_used: {len(rpu)} -> {len(rpu_clean)}")

@@ -15,8 +15,11 @@ DATA = os.path.join(SRC, "data")
 # src/data/raw
 RAW_DATA = os.path.join(DATA, "raw")
 
+PROC_DATA = os.path.join(DATA, "processed")
+
 # Ensure the folders exist
 os.makedirs(RAW_DATA, exist_ok=True)
+os.makedirs(PROC_DATA, exist_ok=True)
 
 
 if __name__ == "__main__":
