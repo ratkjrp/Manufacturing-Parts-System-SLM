@@ -1,53 +1,31 @@
-import sys; print("RUNNING UNDER:", sys.executable)
 import os
-
-# Set up artifactory & token access for HuggingFace
+from util import paths
 os.environ["HF_ENDPOINT"] = "https://infyartifactory.jfrog.io/artifactory/api/huggingfaceml/huggingface-remote"
-os.environ["HF_HUB_ETAG_TIMEOUT"] = "86400"
-os.environ["HF_HUB_DOWNLOAD_TIMEOUT"] = "86400"
 hf_token = os.environ["HF_TOKEN"]
 
-from transformers import AutoModelForCausalLM,  AutoTokenizer
-from peft import PeftModel # Parameter Efficient Fine-Tuning
-from transformers import pipeline
+from transformers import AutoModelForCausalLM, AutoTokenizer
+from peft import PeftModel
 
-device = "cpu"
+BASE = "HuggingFaceTB/SmolLM2-360M-Instruct"
+ADAPTER = os.path.join(paths.SRC, "output", "smollm3-finetuned")
 
-# Models
-smollm3 = "HuggingFaceTB/SmolLM3-3B"
-llama = "meta-llama/Llama-3.2-1B"
-gemma = "google/gemma-4-26B-A4B-it"
+tokenizer = AutoTokenizer.from_pretrained(ADAPTER)
+model = AutoModelForCausalLM.from_pretrained(BASE, token=hf_token)
+model = PeftModel.from_pretrained(model, ADAPTER)   # Applying generated LoRA adapter
+model.eval()
 
-# Chosen Model
-MODEL = smollm3
-
-tokenizer = AutoTokenizer.from_pretrained(MODEL, token=hf_token)
-model = AutoModelForCausalLM.from_pretrained(MODEL, token=hf_token).to(device)
-
-# Model Input
-SYSTEM_PROMPT = "" \
-"You are a parts recommendation service for a manufacturing dealer " \
-"parts management system. Based on the item requested to be ordered " \
-"in addition to their model, type, and reported symptom, recommend other " \
-"parts that may be in association with that requested item."
-
-prompt = "I need a coolant pump."
-messages_think = [
-    {"role": "user", "content": prompt},
-]
+SYSTEM_PROMPT = (
+    "You are a parts recommendation service for a manufacturing dealer "
+    "parts management system. Based on the item requested to be ordered "
+    "in addition to their model, type, and reported symptom, recommend other "
+    "parts that may be in association with that requested item."
+)
+user_msg = "Machine: Sedan, Age: 5 years, Symptom: grinding noise on braking"
 
 text = tokenizer.apply_chat_template(
-    messages_think,
-    tokenize = False,
-    add_generation_prompt = True,
-    )
-model_inputs = tokenizer([text], return_tensors = "pt").to(model.device)
-
-# Generate output
-generated_ids = model.generate(**model_inputs, max_new_tokens=200)
-
-# Get & decode output
-ouput_ids = generated_ids[0][len(model_inputs.input_ids[0]) :]
-print(tokenizer.decode(ouput_ids, skip_special_tokens=True))
-
-
+    [{"role":"system","content":SYSTEM_PROMPT}, {"role":"user","content":user_msg}],
+    tokenize=False, add_generation_prompt=True,
+)
+inputs = tokenizer(text, return_tensors="pt")
+out = model.generate(**inputs, max_new_tokens=500)
+print(tokenizer.decode(out[0][inputs.input_ids.shape[1]:], skip_special_tokens=True))

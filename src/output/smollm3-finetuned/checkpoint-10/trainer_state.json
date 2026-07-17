@@ -1,0 +1,49 @@
+{
+  "best_global_step": 10,
+  "best_metric": 3.734612464904785,
+  "best_model_checkpoint": "C:\\Users\\kayla02.TRN\\Desktop\\sml-exploration\\src\\output\\smollm3-finetuned\\checkpoint-10",
+  "epoch": 0.1,
+  "eval_steps": 500,
+  "global_step": 10,
+  "is_hyper_param_search": false,
+  "is_local_process_zero": true,
+  "is_world_process_zero": true,
+  "log_history": [
+    {
+      "epoch": 0.1,
+      "grad_norm": 2.7716734409332275,
+      "learning_rate": 6.030737921409169e-06,
+      "loss": 3.9234554290771486,
+      "step": 10
+    },
+    {
+      "epoch": 0.1,
+      "eval_loss": 3.734612464904785,
+      "eval_runtime": 240.5727,
+      "eval_samples_per_second": 0.416,
+      "eval_steps_per_second": 0.416,
+      "step": 10
+    }
+  ],
+  "logging_steps": 10,
+  "max_steps": 10,
+  "num_input_tokens_seen": 0,
+  "num_train_epochs": 1,
+  "save_steps": 500,
+  "stateful_callbacks": {
+    "TrainerControl": {
+      "args": {
+        "should_epoch_stop": false,
+        "should_evaluate": false,
+        "should_log": false,
+        "should_save": true,
+        "should_training_stop": true
+      },
+      "attributes": {}
+    }
+  },
+  "total_flos": 18192690019200.0,
+  "train_batch_size": 1,
+  "trial_name": null,
+  "trial_params": null
+}
